@@ -1,0 +1,20 @@
+{
+  "name": "jello",
+  "version": "0.0.1",
+  "description": "A javascript ORM to simplify API integrations with working with simple models and collections from Laraval applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "laravel",
+    "models",
+    "collections",
+    "api"
+  ],
+  "author": "Clayton Salazar",
+  "license": "ISC",
+  "dependencies": {
+    "moment-timezone": "^0.5.33"
+  }
+}
