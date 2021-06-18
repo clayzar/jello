@@ -1,6 +1,6 @@
 {
-  "name": "jello",
-  "version": "0.0.1",
+  "name": "jello.js",
+  "version": "0.0.2",
   "description": "A javascript ORM to simplify API integrations with working with simple models and collections from Laraval applications.",
   "main": "index.js",
   "scripts": {

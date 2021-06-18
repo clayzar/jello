@@ -13,8 +13,6 @@ export default class Collection {
 			map: options.map
 		}
 
-		console.log('collection options:', options, this.options);
-
 		this.items = []
 		this.meta = {}
 		this.links = {}

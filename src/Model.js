@@ -6,7 +6,10 @@ export default class Model {
 
 	constructor()
 	{
-		this._ = {}
+		this._ = {
+			path: null,
+			promise: null
+		}
 		this.isLoaded = false
 	}
 
@@ -27,54 +30,53 @@ export default class Model {
 	static from(data) {
 		const object = new this()
 
-		for(const attribute in data)
-		{
-			object[attribute] = data[attribute]
-
-			if(this.casts) {
-				if(attribute in this.casts) {
-					if(Array.isArray(this.casts[attribute])) {
-						if(!Array.isArray(data[attribute])) {
-							console.error(`Mismatch cast specified, both either must be an array or not an array. Attribute: ${attribute}`)
-						} else {
-							const [classConstructor, parentAttribute] = this.casts[attribute]
-							const parent = Object.getPrototypeOf(classConstructor)
-
-							if(parent != Model) {
-								console.error('The class specified for array attribute does not inherit from the base Model class.');
-							} else {
-								object[attribute] = classConstructor.hydrate(data[attribute])
-								if(parentAttribute) {
-									object[attribute].forEach(child => {
-										child[parentAttribute] = object
-									})
-								}
-							}
-						}
-					} else if(Object.getPrototypeOf(this.casts[attribute]) == Model) {
-						object[attribute] = this.casts[attribute].from(data[attribute])
-					} else if(this.casts[attribute] == Date) {
-						object[attribute] = moment(data[attribute])
-					}
-				}
-			}
-		}
-
+		object.fill(data)
 		object.loaded()
-
 		object.isLoaded = true
 
 		return object
 	}
 
-	static load(path, options = {}) {
-		const clientKey = options.client
-		const client = Jello.client(clientKey)
-		const params = options.params
+	fill(data) {
+		for(const attribute in data)
+		{
+			this[attribute] = data[attribute]
 
-		return client.get(path, params)
-		.then(response => response.data.data)
-		.then(data => this.from(data))
+			const casts = this.constructor.casts
+			if(casts) {
+				if(attribute in casts) {
+					if(Array.isArray(casts[attribute])) {
+						if(!Array.isArray(data[attribute])) {
+							console.error(`Mismatch cast specified, both either must be an array or not an array. Attribute: ${attribute}`)
+						} else {
+							const [classConstructor, parentAttribute] = casts[attribute]
+							const parent = Object.getPrototypeOf(classConstructor)
+
+							if(parent != Model) {
+								console.error('The class specified for array attribute does not inherit from the base Model class.');
+							} else {
+								this[attribute] = classConstructor.hydrate(data[attribute])
+								if(parentAttribute) {
+									this[attribute].forEach(child => {
+										child[parentAttribute] = this
+									})
+								}
+							}
+						}
+					} else if(Object.getPrototypeOf(casts[attribute]) == Model) {
+						this[attribute] = casts[attribute].from(data[attribute])
+					} else if(casts[attribute] == Date) {
+						this[attribute] = moment(data[attribute])
+					}
+				}
+			}
+		}
+
+		return this
+	}
+
+	static load(path, options = {}) {
+		return (new this()).loadFrom(path, options)
 	}
 
 	static collection(options) {
@@ -84,8 +86,51 @@ export default class Model {
 		})
 	}
 
-	loaded()
-	{
+	loaded() {
 		// Called when the object has been loaded, ie. it's attributes have all been assigned
 	}
+
+	loadFrom(path, options) {
+		const clientKey = options.client
+		const client = Jello.client(clientKey)
+		const params = options.params
+		this._.path = path
+		this._.client = client
+
+		this._.promise = client.get(path, params)
+		.then(response => response.data.data)
+		.then(data => {
+			this.fill(data)
+			this.loaded()
+			this.isLoaded = true
+
+			this.then = null
+			return this
+		})
+
+		return this
+	}
+
+	then(callback) {
+		this._.promise.then(callback)
+		return this
+	}
+
+	catch(callback) {
+		this._.promise.catch(callback)
+		return this
+	}
+
+	finally(callback) {
+		this._.promise.finally(callback)
+		return this
+	}
+
+	// save() {
+	// 	const { client, path } = this._
+
+	// 	const data = this.data()
+
+	// 	return client.post(path, data)
+	// }
 }
