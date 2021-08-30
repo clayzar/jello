@@ -1,12 +1,11 @@
-const defaults = {
+module.exports = defaults = {
 	collections: {
 		paginate: 'auto',
 	},
 	models: {
+		wrapped: 'data',
 		saved: {
 			merge: true
 		}
 	}
 }
-
-export default defaults

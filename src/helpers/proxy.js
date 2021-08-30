@@ -1,4 +1,4 @@
-export const attributeProxyHander = {
+module.exports.attributeProxyHander = {
 	get(object, prop, proxy) {
 		if(['then', 'catch', 'finally'].includes(prop)) {
 			return (callback) => {
@@ -59,7 +59,7 @@ export const attributeProxyHander = {
 	// },				
 }
 
-export const modelProcessStateProxyHandler = {
+module.exports.modelProcessStateProxyHandler = {
 	set(object, prop, value) {
 		object[prop] = value
 		if(['loading', 'saving'].includes(prop)) {

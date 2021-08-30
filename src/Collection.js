@@ -1,9 +1,9 @@
-import Jello from './Jello'
+const Jello = require('./Jello')
 
-import { modelProcessStateProxyHandler } from './helpers/proxy'
-import getOptions from './helpers/getOptions'
+const { modelProcessStateProxyHandler } = require('./helpers/proxy')
+const getOptions = require('./helpers/getOptions')
 
-export default class Collection {
+module.exports = class Collection {
 
 	constructor(options = {}) {
 			
@@ -47,6 +47,7 @@ export default class Collection {
 		this.are.loading = true
 
 		options = getOptions(Jello.config(), this.options, options)
+		console.log('options:', options);
 		
 		const params = options.params || {}
 

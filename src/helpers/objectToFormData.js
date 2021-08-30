@@ -1,4 +1,4 @@
-const objectToFormData = (object, data, namespace) => {
+module.exports = function objectToFormData(object, data, namespace) {
 
 	data = data || new FormData();
 	
@@ -19,6 +19,4 @@ const objectToFormData = (object, data, namespace) => {
 	}
 	
 	return data;
-};
-
-export default objectToFormData
+}

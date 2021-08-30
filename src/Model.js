@@ -1,12 +1,12 @@
-import moment from 'moment-timezone'
-import { config, getClient } from './Jello'
-import Collection from './Collection'
+const moment = require('moment-timezone')
+const { config, getClient } = require('./Jello')
+const Collection = require('./Collection')
 
-import { attributeProxyHander, modelProcessStateProxyHandler } from './helpers/proxy'
-import objectToFormData from './helpers/objectToFormData'
-import getOptions from './helpers/getOptions'
+const { attributeProxyHander, modelProcessStateProxyHandler } = require('./helpers/proxy')
+const objectToFormData = require('./helpers/objectToFormData')
+const getOptions = require('./helpers/getOptions')
 
-export default class Model {
+module.exports = class Model {
 
 	constructor(data, options = {})
 	{
@@ -140,11 +140,19 @@ export default class Model {
 		this.is.loading = true
 
 		options = getOptions(config(), this._options, options)
+
+		console.log('options:', options);
 		
 		path = path || this._options.path
 
 		this._promise = getClient(options.client).get(path, options)
-			.then(response => response.data.data)
+			.then(response => {
+				if(options.models.wrapped === false) {
+					return response.data
+				} else {
+					return response.data[options.models.wrapped]
+				}
+			})
 			.then(data => {
 				this.fill(data)
 				this.is.loaded = true

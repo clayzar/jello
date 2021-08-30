@@ -1,12 +1,12 @@
-import defaults from './config/defaults'
+const defaults = require('./config/defaults')
 
-import getOptions from './helpers/getOptions'
+const getOptions = require('./helpers/getOptions')
 
 let configState = {}
 
 let hasAppliedConfig = false
 
-export function config(config = null) {
+function config(config = null) {
 	if(config == null) {
 		return getOptions(configState, ...arguments)
 	}
@@ -26,11 +26,11 @@ export function config(config = null) {
 	hasAppliedConfig = true
 }
 
-export function defaultClient() {
+function defaultClient() {
 	return getClient(configState.clients.default)
 }
 
-export function getClient(key = null) {
+function getClient(key = null) {
 	if(!key) {
 		if(configState.clients.default) {
 			if(typeof configState.clients.default == 'string') {
@@ -51,8 +51,12 @@ export function getClient(key = null) {
 	}
 }
 
-export default {
+module.exports = {
 	config,
 	defaultClient,
 	getClient
 }
+
+module.exports.config = config
+module.exports.defaultClient = defaultClient
+module.exports.getClient = getClient
