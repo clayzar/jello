@@ -2,7 +2,17 @@ const defaults = require('./config/defaults')
 
 const getOptions = require('./helpers/getOptions')
 
-let configState = {}
+let configState = {
+	models: {
+		wrapped: false,
+		saved: {
+			merge: false
+		}
+	},
+	collections: {
+		paginate: 'auto'
+	}
+}
 
 let hasAppliedConfig = false
 

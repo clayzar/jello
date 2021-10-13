@@ -8,8 +8,7 @@ const getOptions = require('./helpers/getOptions')
 
 module.exports = class Model {
 
-	constructor(data, options = {})
-	{
+	constructor(data, options = {}) {
 		this.is = new Proxy({
 			loading: false,
 			loaded: false,
@@ -109,20 +108,34 @@ module.exports = class Model {
 							}
 						}
 					} else if(Object.getPrototypeOf(schema[attribute]) == Model) {
-						this._attributes[attribute] = schema[attribute].from(data[attribute])
+						if(data[attribute] instanceof Model) {
+							if(data[attribute] instanceof schema[attribute]) {
+								this._attributes[attribute] = data[attribute]
+							} else {
+								const expectedModelName = (new schema[attribute]).constructor.name
+								const receivedModelName = data[attribute].constructor.name
+								console.error(`Mismatched model class. Attempting to set property "${attribute}" on "${this.constructor.name}". Expect an instance of "${expectedModelName}" but got a "${receivedModelName}"`);
+							}
+ 						} else {
+							this._attributes[attribute] = schema[attribute].from(data[attribute])
+ 						}
 					} else if(schema[attribute] == Date) {
 						this._attributes[attribute] = moment(data[attribute])
 					} else if(schema[attribute] == Number) {
 						this._attributes[attribute] = Number(data[attribute])
 					} else if(schema[attribute] == Boolean) {
 						this._attributes[attribute] = Boolean(data[attribute])
+					} else if(schema[attribute] == String) {
+						this._attributes[attribute] = String(data[attribute])
+					} else if(typeof schema[attribute] == 'function') {
+						this._attributes[attribute] = schema[attribute](data[attribute])
 					}
 				}
 			}
 		}
 
 		if(!this.is.loaded) {
-			this._original = this._attributes
+			this._original = {...this._attributes}
 		}
 
 		if(Object.keys(data).length) {
@@ -141,9 +154,11 @@ module.exports = class Model {
 
 		options = getOptions(config(), this._options, options)
 
-		console.log('options:', options);
+		// console.log('options:', options);
 		
 		path = path || this._options.path
+
+		// console.log('client': getClient(options.client));
 
 		this._promise = getClient(options.client).get(path, options)
 			.then(response => {

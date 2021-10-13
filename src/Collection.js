@@ -47,7 +47,6 @@ module.exports = class Collection {
 		this.are.loading = true
 
 		options = getOptions(Jello.config(), this.options, options)
-		console.log('options:', options);
 		
 		const params = options.params || {}
 
@@ -55,7 +54,7 @@ module.exports = class Collection {
 			delete params.seek
 		}
 
-		if(options.collections.paginate && !params.seek) {
+		if([true, 'auto'].includes(options.collections.paginate) && !params.seek) {
 			params.page = params.page || this.meta.current_page || 1
 		}
 
