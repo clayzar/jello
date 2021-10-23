@@ -51,6 +51,8 @@ module.exports = class Model {
 			// 	}
 			// }
 		}
+
+		this._original = {...this._attributes}
 	}
 
 	/*

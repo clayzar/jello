@@ -1,3 +1,4 @@
+const path = require('path')
 const defaults = require('./config/defaults')
 
 const getOptions = require('./helpers/getOptions')
@@ -7,16 +8,34 @@ let configState = {
 		wrapped: false,
 		saved: {
 			merge: false
-		}
+		},
+		path: path.resolve('./src/models')
 	},
 	collections: {
 		paginate: 'auto'
-	}
+	},
+	packageAliasedAs: 'jello.js'
 }
 
 let hasAppliedConfig = false
 
+let loadedConfigFile = false
+
+// function init(path = null) {
+// 	if(!loadedConfigFile) {
+// 		loadedConfigFile = true
+// 		let userConfig = null
+// 		try {
+// 			userConfig = require('./../../../jello.config.js')
+// 		} catch {
+// 			userConfig = require(path)
+// 		}
+// 		config(userConfig)
+// 	}
+// }
+
 function config(config = null) {
+
 	if(config == null) {
 		return getOptions(configState, ...arguments)
 	}
@@ -41,6 +60,7 @@ function defaultClient() {
 }
 
 function getClient(key = null) {
+	console.log(configState);
 	if(!key) {
 		if(configState.clients.default) {
 			if(typeof configState.clients.default == 'string') {

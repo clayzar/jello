@@ -1,8 +1,11 @@
 {
   "name": "jello.js",
-  "version": "0.1.14",
+  "version": "0.1.16",
   "description": "A javascript ORM to simplify API integrations with working with simple models and collections from Laraval applications.",
   "main": "index.js",
+  "bin": {
+    "jello": "src/cli/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

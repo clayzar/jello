@@ -1,0 +1,10 @@
+import { Model } from '#PKG_ALIAS'
+
+export default class #MODEL extends Model {
+	
+}
+
+#MODEL.schema = () => ({
+	id: Number,
+	created_at: Date
+})
