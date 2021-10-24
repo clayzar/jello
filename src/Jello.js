@@ -60,7 +60,6 @@ function defaultClient() {
 }
 
 function getClient(key = null) {
-	console.log(configState);
 	if(!key) {
 		if(configState.clients.default) {
 			if(typeof configState.clients.default == 'string') {

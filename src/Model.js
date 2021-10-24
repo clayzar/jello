@@ -2,6 +2,8 @@ const moment = require('moment-timezone')
 const { config, getClient } = require('./Jello')
 const Collection = require('./Collection')
 
+const ErrorBag = require('./ErrorBag')
+
 const { attributeProxyHander, modelProcessStateProxyHandler } = require('./helpers/proxy')
 const objectToFormData = require('./helpers/objectToFormData')
 const getOptions = require('./helpers/getOptions')
@@ -24,7 +26,8 @@ module.exports = class Model {
 		this._promise = null
 		this._attributes = {}
 		this._original = {}
-		this._changes = {}	
+		this._changes = {}
+		this.errors = new ErrorBag()
 
 		this.applySchema()
 
@@ -155,14 +158,14 @@ module.exports = class Model {
 		this.is.loading = true
 
 		options = getOptions(config(), this._options, options)
-
-		// console.log('options:', options);
 		
 		path = path || this._options.path
 
-		// console.log('client': getClient(options.client));
-
-		this._promise = getClient(options.client).get(path, options)
+		const request = this._promise = getClient(options.client).get(path)
+			.finally(result => {
+				this._promise = null
+				return result
+			})
 			.then(response => {
 				if(options.models.wrapped === false) {
 					return response.data
@@ -192,25 +195,56 @@ module.exports = class Model {
 			return
 		}
 
+		this.errors.clear()
+
 		this.is.saving = true
 
 		options = getOptions(config(), this._options, options)
-		
-		const data = objectToFormData(this.toPlain())
 
-		return getClient(options.client).post(path, data)
-		.then(response => response.data.data)
-		.then(data => {
-			if(options.models.saved.merge) {
-				this._attributes = Object.assign({}, this._attributes, data)
-			}
-			this.applyChanges()
-			return data			
-		})
-		.finally(result => {
-			this.is.saving = false
-			return result
-		})
+		const data = this.toPlain()
+
+		const method = this[this.getKeyName()] ? 'put' : 'post'
+		
+		const request = this._promise = getClient(options.client)[method](path, data)
+			.finally(result => {
+				// console.log('Model.js: finally:', result);
+				this._promise = null
+				return result
+			})
+			.catch(error => {
+				// console.log('Model.js: catch:', error);
+				if(error.response.status == 422) {
+					this.errors.record(error.response.data.errors)
+				}
+
+				throw error
+			})
+			.then(response => {
+				// console.log('Model.js: wrap check', response);
+				if(options.models.wrapped === false) {
+					return response.data
+				} else {
+					return response.data[options.models.wrapped]
+				}
+			})
+			.then(data => {
+				// console.log('Model.js: merge check', data);
+				if(options.models.saved.merge) {
+					this._attributes = Object.assign({}, this._attributes, data)
+				}
+				this.applyChanges()
+				return data
+			})
+			.finally(result => {
+				this.is.saving = false
+				return result
+			})
+
+		return this
+	}
+
+	getKeyName() {
+		return 'id'
 	}
 
 	toPlain() {

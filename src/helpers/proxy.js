@@ -1,19 +1,19 @@
 module.exports.attributeProxyHander = {
 	get(object, prop, proxy) {
-		if(['then', 'finally'].includes(prop)) {
-			return (callback) => {
-				if(!object.is.loaded) {
-					object._promise[prop](callback)
-					return proxy
-				}
+		if(['then', 'catch', 'finally'].includes(prop)) {
 
-				try {
-					return Promise.resolve(callback(object))
-				} catch(error) {
-					console.error('Jello.js proxy error:', error);
+			return (callback) => {
+				if(object._promise) {
+					object._promise = object._promise[prop](callback)
+					return proxy					
+				} else {
+					if(prop != 'catch') {
+						callback(object)
+					}
 					return proxy
 				}
 			}
+			
 		}
 
 		if(prop == '$') {
