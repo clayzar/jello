@@ -36,26 +36,28 @@ module.exports = class Model {
 			this.is.loaded = true
 		}
 
-		return new Proxy(this, attributeProxyHander)
+		const reactiveWrapper = config().reactiveWrapper
+		return reactiveWrapper(new Proxy(this, attributeProxyHander))
 	}
 
+	get $() {
+		return this._original
+	}
+
+	get _(){
+		return this._changes
+	}	
+
 	applySchema() {
+
 		const schema = this.constructor.getSchema()
+		const attributes = {}
 		for(const key in schema) {
-			this._attributes[key] = null
-
-			// const valueType = schema[key]
-
-			// if(!valueType instanceof Function) {
-			// 	if(valueType instanceof Array) {
-			// 		this[key] = []
-			// 	} else if(valueType instanceof Object) {
-			// 		this[key] = valueType
-			// 	}
-			// }
+			attributes[key] = null
 		}
+		this._attributes = attributes
 
-		this._original = {...this._attributes}
+		this._original = {...attributes}
 	}
 
 	/*
@@ -288,7 +290,7 @@ module.exports = class Model {
  	}
 
 	revertChanges() {
-		this._attributes = this._original
+		this._attributes = {...this._original}
 	}
 
 	applyChanges() {
@@ -297,7 +299,7 @@ module.exports = class Model {
 			...this.getDirty(),
 		}
 
-		this._original = this._attributes
+		this._original = {...this._attributes}
 	}
 
 	wasChanged(attributes) {
@@ -330,9 +332,10 @@ module.exports = class Model {
 	}
 
 	static collection(options) {
-		return new Collection({
+		const reactiveWrapper = config().reactiveWrapper	
+		return reactiveWrapper(new Collection({
 			model: this,
 			...options
-		})
+		}))
 	}	
 }

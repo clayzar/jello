@@ -4,6 +4,7 @@ const defaults = require('./config/defaults')
 const getOptions = require('./helpers/getOptions')
 
 let configState = {
+	clients: {},
 	models: {
 		wrapped: false,
 		saved: {
@@ -14,28 +15,15 @@ let configState = {
 	collections: {
 		paginate: 'auto'
 	},
-	packageAliasedAs: 'jello.js'
+	packageAliasedAs: 'jello.js',
+	reactiveWrapper: (value) => value,
 }
 
 let hasAppliedConfig = false
 
 let loadedConfigFile = false
 
-// function init(path = null) {
-// 	if(!loadedConfigFile) {
-// 		loadedConfigFile = true
-// 		let userConfig = null
-// 		try {
-// 			userConfig = require('./../../../jello.config.js')
-// 		} catch {
-// 			userConfig = require(path)
-// 		}
-// 		config(userConfig)
-// 	}
-// }
-
 function config(config = null) {
-
 	if(config == null) {
 		return getOptions(configState, ...arguments)
 	}

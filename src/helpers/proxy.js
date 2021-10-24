@@ -16,10 +16,6 @@ module.exports.attributeProxyHander = {
 			
 		}
 
-		if(prop == '$') {
-			return object._original
-		}
-
 		if(object.hasOwnProperty(prop)) {
 			return object[prop]
 		}

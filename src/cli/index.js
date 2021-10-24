@@ -2,7 +2,7 @@
 const path = require('path')
 
 const { config } = require('./../Jello');
-const projectConfig = require(path.resolve('./jello.config.js'))
+const projectConfig = require(path.resolve('./jello.config.cli.js'))
 config(projectConfig)
 
 const alias = config().packageAliasedAs
@@ -10,8 +10,14 @@ const alias = config().packageAliasedAs
 const args = process.argv.splice(2)
 const [ command, ...options ] = args
 
-const MakeModel = require('./commands/MakeModel')
+const commands = {};
+require("fs").readdirSync(path.resolve(`${__dirname}/commands`)).forEach(function(file) {
+	const command = require(path.resolve(`${__dirname}/commands/${file}`));
+	commands[command.command] = command
+});
 
-if(command == 'make:model') {
-	return MakeModel.handle(options)
+if(command in commands) {
+	commands[command].handle(options)
+} else {
+	console.error(`Command does not exist: "${command}"`)
 }
