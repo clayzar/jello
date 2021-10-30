@@ -29,10 +29,7 @@ module.exports.attributeProxyHander = {
 		if(object.hasOwnProperty(prop)) {
 			object[prop] = value
 		} else {
-			object._attributes = {
-				...object._attributes,
-				[prop]: value
-			}
+			object._attributes[prop] = value
 		}
 
 		return true

@@ -1,4 +1,3 @@
-const moment = require('moment-timezone')
 const { config, getClient } = require('./Jello')
 const Collection = require('./Collection')
 
@@ -7,6 +6,8 @@ const ErrorBag = require('./ErrorBag')
 const { attributeProxyHander, modelProcessStateProxyHandler } = require('./helpers/proxy')
 const objectToFormData = require('./helpers/objectToFormData')
 const getOptions = require('./helpers/getOptions')
+
+const { reactive } = require('@vue/reactivity')
 
 module.exports = class Model {
 
@@ -24,9 +25,9 @@ module.exports = class Model {
 		}, options)
 
 		this._promise = null
-		this._attributes = {}
-		this._original = {}
-		this._changes = {}
+		this._attributes = reactive({})
+		this._original = reactive({})
+		this._changes = reactive({})
 		this.errors = new ErrorBag()
 
 		this.applySchema()
@@ -36,8 +37,7 @@ module.exports = class Model {
 			this.is.loaded = true
 		}
 
-		const reactiveWrapper = config().reactiveWrapper
-		return reactiveWrapper(new Proxy(this, attributeProxyHander))
+		return new Proxy(this, attributeProxyHander)
 	}
 
 	get $() {
@@ -55,9 +55,10 @@ module.exports = class Model {
 		for(const key in schema) {
 			attributes[key] = null
 		}
-		this._attributes = attributes
 
-		this._original = {...attributes}
+		this._attributes = reactive(attributes)
+
+		this._original = reactive({...attributes})
 	}
 
 	/*
@@ -127,7 +128,7 @@ module.exports = class Model {
 							this._attributes[attribute] = schema[attribute].from(data[attribute])
  						}
 					} else if(schema[attribute] == Date) {
-						this._attributes[attribute] = moment(data[attribute])
+						this._attributes[attribute] = Date(data[attribute])
 					} else if(schema[attribute] == Number) {
 						this._attributes[attribute] = Number(data[attribute])
 					} else if(schema[attribute] == Boolean) {
@@ -142,7 +143,7 @@ module.exports = class Model {
 		}
 
 		if(!this.is.loaded) {
-			this._original = {...this._attributes}
+			this._original = reactive({...this._attributes})
 		}
 
 		if(Object.keys(data).length) {
@@ -232,7 +233,7 @@ module.exports = class Model {
 			.then(data => {
 				// console.log('Model.js: merge check', data);
 				if(options.models.saved.merge) {
-					this._attributes = Object.assign({}, this._attributes, data)
+					this._attributes = reactive(Object.assign({}, this._attributes, data))
 				}
 				this.applyChanges()
 				return data
@@ -290,16 +291,16 @@ module.exports = class Model {
  	}
 
 	revertChanges() {
-		this._attributes = {...this._original}
+		this._attributes = reactive({...this._original})
 	}
 
 	applyChanges() {
-		this._changes = {
+		this._changes = reactive({
 			...this._changes,
 			...this.getDirty(),
-		}
+		})
 
-		this._original = {...this._attributes}
+		this._original = reactive({...this._attributes})
 	}
 
 	wasChanged(attributes) {
@@ -332,10 +333,9 @@ module.exports = class Model {
 	}
 
 	static collection(options) {
-		const reactiveWrapper = config().reactiveWrapper	
-		return reactiveWrapper(new Collection({
+		return new Collection({
 			model: this,
 			...options
-		}))
+		})
 	}	
 }

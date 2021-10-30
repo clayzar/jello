@@ -1,6 +1,6 @@
 {
   "name": "jello.js",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "A javascript ORM to simplify API integrations with working with simple models and collections from Laraval applications.",
   "main": "index.js",
   "bin": {
@@ -18,7 +18,7 @@
   "author": "Clayton Salazar",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.17.21",
-    "moment-timezone": "^0.5.33"
+    "@vue/reactivity": "^3.2.20",
+    "lodash": "^4.17.21"
   }
 }
