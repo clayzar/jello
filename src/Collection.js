@@ -3,17 +3,19 @@ const Jello = require('./Jello')
 const { modelProcessStateProxyHandler } = require('./helpers/proxy')
 const getOptions = require('./helpers/getOptions')
 
+const { reactive } = require('@vue/reactivity')
+
 module.exports = class Collection {
 
 	constructor(options = {}) {
 			
 		this.options = options
 
-		this.are = new Proxy({
+		this.is = reactive(new Proxy({
 			loading: false,
 			loaded: false,
 			busy: false,
-		}, modelProcessStateProxyHandler)
+		}, modelProcessStateProxyHandler))
 
 		this.items = []
 		this.meta = {}
@@ -27,6 +29,10 @@ module.exports = class Collection {
 		if(options.load === true) {
 			this.load()
 		}
+	}
+
+	get are() {
+		return this.is
 	}
 
 	[Symbol.iterator]() {

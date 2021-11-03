@@ -12,12 +12,12 @@ const { reactive } = require('@vue/reactivity')
 module.exports = class Model {
 
 	constructor(data, options = {}) {
-		this.is = new Proxy({
+		this.is = reactive(new Proxy({
 			loading: false,
 			loaded: false,
 			saving: false,
 			busy: false,
-		}, modelProcessStateProxyHandler)
+		}, modelProcessStateProxyHandler))
 
 		this._options = getOptions({
 			path: null,
