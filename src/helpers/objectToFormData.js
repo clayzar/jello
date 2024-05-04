@@ -1,4 +1,4 @@
-module.exports = function objectToFormData(object, data, namespace) {
+export default function objectToFormData(object, data, namespace) {
 
 	data = data || new FormData();
 	

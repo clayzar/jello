@@ -1,5 +1,6 @@
-module.exports.attributeProxyHander = {
+const attributeProxyHander = {
 	get(object, prop, proxy) {
+		// console.log('get:', prop, object, proxy);
 		if(['then', 'catch', 'finally'].includes(prop)) {
 
 			return (callback) => {
@@ -7,7 +8,8 @@ module.exports.attributeProxyHander = {
 					object._promise = object._promise[prop](callback)
 					return proxy					
 				} else {
-					if(prop != 'catch') {
+					if(prop !== 'catch') {
+						// console.log('calling callback:', object, proxy);
 						callback(object)
 					}
 					return proxy
@@ -17,9 +19,11 @@ module.exports.attributeProxyHander = {
 		}
 
 		if(object.hasOwnProperty(prop)) {
+			// console.log('get: hasOwnProperty', prop,  object, proxy);
 			return object[prop]
 		}
 		if(object._attributes.hasOwnProperty(prop)) {
+			// console.log('get: has _attribute', prop, object, proxy);
 			return object._attributes[prop]
 		}
 
@@ -37,10 +41,11 @@ module.exports.attributeProxyHander = {
 	has: function (object, prop) {
 		return object._attributes.hasOwnProperty(prop)
 	},				
-	// deleteProperty: function (oTarget, sKey) {
-	// 	console.log('delete');
-	// 	return Reflect.deleteProperty(...arguments)
-	// },
+	deleteProperty: function (object, prop) {
+		if(prop in object._attributes) {
+			return delete object[prop]
+		}
+	},
 	// enumerate: function (oTarget, sKey) {
 	// 	console.log('enumerate');
 	// 	return Reflect.enumerate(...arguments)
@@ -57,7 +62,7 @@ module.exports.attributeProxyHander = {
 	// },				
 }
 
-module.exports.modelProcessStateProxyHandler = {
+const modelProcessStateProxyHandler = {
 	set(object, prop, value) {
 		object[prop] = value
 		if(['loading', 'saving'].includes(prop)) {
@@ -65,4 +70,9 @@ module.exports.modelProcessStateProxyHandler = {
 		}
 		return true
 	}
+}
+
+export {
+	attributeProxyHander,
+	modelProcessStateProxyHandler
 }

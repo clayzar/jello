@@ -1,15 +1,15 @@
-const { config, getClient } = require('./Jello')
-const Collection = require('./Collection')
+import { config, getClient } from './Jello'
+import Collection from './Collection'
 
-const ErrorBag = require('./ErrorBag')
+import ErrorBag from './ErrorBag'
 
-const { attributeProxyHander, modelProcessStateProxyHandler } = require('./helpers/proxy')
-const objectToFormData = require('./helpers/objectToFormData')
-const getOptions = require('./helpers/getOptions')
+import { attributeProxyHander, modelProcessStateProxyHandler } from './helpers/proxy'
+import objectToFormData from './helpers/objectToFormData'
+import getOptions from './helpers/getOptions'
 
-const { reactive } = require('@vue/reactivity')
+import { reactive } from '@vue/reactivity'
 
-module.exports = class Model {
+export default class Model {
 
 	constructor(data, options = {}) {
 		this.is = reactive(new Proxy({
@@ -81,7 +81,7 @@ module.exports = class Model {
 		object.fill(data)
 		object.is.loaded = true
 
-		return object
+		return new Proxy(object, attributeProxyHander)
 	}
 
 	fill(data) {
@@ -179,18 +179,23 @@ module.exports = class Model {
 			.then(data => {
 				this.fill(data)
 				this.is.loaded = true
-				return this
+				this.loaded?.()
+				return new Proxy(this, attributeProxyHander)
 			})
 			.finally(result => {
 				this.is.loading = false
 				return result
 			})
 
-		return this
+		return new Proxy(this, attributeProxyHander)
+	}
+
+	wrap() {
+		return new Proxy(this, attributeProxyHander)
 	}
 
 	static load(path, options = {}) {
-		return (new this()).load(...arguments)
+		return (new this).load(...arguments)
 	}
 
 	save(path, options = {}) {
@@ -254,15 +259,25 @@ module.exports = class Model {
 		const data = {}
 		
 		for(const [key, value] of Object.entries(this._attributes)) {
-			const isAModel = (() => {
+			const isAModel = (value) => {
 				try {
 					return Object.getPrototypeOf(Object.getPrototypeOf(value).constructor) == Model
 				} catch {
 					return false
 				}
-			})()
+			}
 
-			if(value && isAModel) {
+			
+			if(Array.isArray(value)) {
+				data[key] = []
+				for(const v of value) {
+					if(isAModel(v)) {
+						data[key].push(v.toPlain())
+					} else {
+						data.push(v)
+					}
+				}
+			} else if(value && isAModel(value)) {
 				data[key] = value.toPlain()
 			} else {
 				data[key] = value

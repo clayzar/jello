@@ -1,7 +1,7 @@
-module.exports = defaults = {
+const defaults = {
 	collections: {
-		paginate: 'auto',
-	},
+        paginate: false, // true, false, "infinite"
+    },
 	models: {
 		wrapped: 'data',
 		saved: {
@@ -9,3 +9,5 @@ module.exports = defaults = {
 		}
 	}
 }
+
+export default defaults

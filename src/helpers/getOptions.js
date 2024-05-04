@@ -1,6 +1,6 @@
-const { merge } = require('lodash')
+import { merge } from 'lodash'
 
-module.exports = function getOptions() {
+export default function getOptions() {
 	let options = {};
 	for(const someOptions of arguments) {
 		options = merge(options, someOptions)

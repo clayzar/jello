@@ -1,7 +1,10 @@
-const Jello = require('./src/Jello')
-const Model = require('./src/Model')
-const Collection = require('./src/Collection')
+import Jello from './src/Jello'
+import Model from './src/Model'
+import Collection from './src/Collection'
 
-module.exports = Jello
-module.exports.Model = Model
-module.exports.Collection = Collection
+export default Jello
+
+export {
+	Model,
+	Collection
+}
