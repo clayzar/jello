@@ -274,7 +274,7 @@ export default class Model {
 					if(isAModel(v)) {
 						data[key].push(v.toPlain())
 					} else {
-						data.push(v)
+						data[key].push(v)
 					}
 				}
 			} else if(value && isAModel(value)) {
